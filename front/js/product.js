@@ -10,7 +10,9 @@ const fetchItems = async () => {
     .then((promise) => {
       dataProduct = promise;
     })
-    .catch( (error) => {alert("erreur serveur, Veuillez contacter l'administrateur du site !!")});
+    .catch((error) => {
+      alert("erreur serveur, Veuillez contacter l'administrateur du site !!");
+    });
 };
 
 //Affichage de la carte produit
@@ -18,11 +20,15 @@ const fetchItems = async () => {
 const itemsDisplay = async () => {
   await fetchItems();
 
-  document.querySelector(".item__img").innerHTML = `<img src="${dataProduct.imageUrl}" alt="${dataProduct.altTxt}"> `;
-  document.getElementById("title").textContent= `${dataProduct.name}`;
-  document.getElementById("description").textContent= `${dataProduct.description}`;
-  document.getElementById("price").textContent= `${dataProduct.price}`;
-  
+  document.querySelector(
+    ".item__img"
+  ).innerHTML = `<img src="${dataProduct.imageUrl}" alt="${dataProduct.altTxt}"> `;
+  document.getElementById("title").textContent = `${dataProduct.name}`;
+  document.getElementById(
+    "description"
+  ).textContent = `${dataProduct.description}`;
+  document.getElementById("price").textContent = `${dataProduct.price}`;
+
   //Ajout d'option de couleurs
 
   let selectColor = document.getElementById("colors");
@@ -32,8 +38,8 @@ const itemsDisplay = async () => {
     option.value = `${element}`;
     selectColor.appendChild(option);
   });
- 
-   addBasket();
+
+  addBasket();
 };
 
 itemsDisplay();
@@ -43,30 +49,37 @@ itemsDisplay();
 const addBasket = () => {
   let button = document.getElementById("addToCart");
   button.addEventListener("click", (event) => {
-     event.stopPropagation();
-     event.preventDefault();
-     let quantity = document.getElementById("quantity").value;
-     //1/preparer un objet à ajouter
-     let product = {
-         id: dataProduct._id,
-         name: dataProduct.name,
-         price : dataProduct.price,
-         imageUrl: dataProduct.imageUrl,
-         altTxt : dataProduct.altTxt,
-         quantity: parseInt(quantity),
-         color : document.getElementById("colors").value
-     } 
-     //2/ recuperer le tableau de localstorage
-     let productArray = getLocalStorage();
-     //3/ Ajouter le produit prepareé dans le tableau
-     productArray.push(product);
-     //4/ mettre à jour le localstorage avec le nouveau tableau
-     setLocalStorage(productArray);
+    event.stopPropagation();
+    event.preventDefault();
+    let productQuantity = parseInt(document.getElementById("quantity").value);
+    let itemColor = document.getElementById("colors").value;
 
-
-
+   // Si la quantité et la couleur sont valide : ajouter au panier
+    if(controlQuantity(productQuantity)== true , controlColor(itemColor)== true){
+    
+    //1/preparer un objet à ajouter
+    let product = {
+      _id: dataProduct._id,
+      name: dataProduct.name,
+      price: dataProduct.price,
+      imageUrl: dataProduct.imageUrl,
+      altTxt: dataProduct.altTxt,
+      quantity: productQuantity,
+      color: document.getElementById("colors").value,
+    };
+    alert("Produit ajouté au panier !")
+    //2/ recuperer le tableau de localstorage
+    let productArray = getLocalStorage();
+    //3/ Ajouter le produit prepareé dans le tableau
+    addProductToLocalStorage(productArray, product);
+    //4/ mettre à jour le localstorage avec le nouveau tableau
+    setLocalStorage(productArray);
+  }
   });
-}
+  
+  
+};
+
 
 
 
