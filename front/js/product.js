@@ -55,7 +55,7 @@ const addBasket = () => {
     let itemColor = document.getElementById("colors").value;
 
    // Si la quantité et la couleur sont valide : ajouter au panier
-    if(controlQuantity(productQuantity)== true , controlColor(itemColor)== true){
+    if(controlQuantity(productQuantity)== true && controlColor(itemColor)== true){
     
     //1/preparer un objet à ajouter
     let product = {
@@ -67,13 +67,12 @@ const addBasket = () => {
       quantity: productQuantity,
       color: document.getElementById("colors").value,
     };
-    alert("Produit ajouté au panier !")
-    //2/ recuperer le tableau de localstorage
+     //2/ recuperer le tableau de localstorage
     let productArray = getLocalStorage();
     //3/ Ajouter le produit prepareé dans le tableau
     addProductToLocalStorage(productArray, product);
-    //4/ mettre à jour le localstorage avec le nouveau tableau
-    setLocalStorage(productArray);
+    
+   
   }
   });
   

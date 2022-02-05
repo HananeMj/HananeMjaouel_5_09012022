@@ -1,5 +1,5 @@
-let productsLocalStorage = JSON.parse(localStorage.getItem("products"));
-console.log(productsLocalStorage);
+let productsLocalStorage = getLocalStorage();
+cartDisplay();
 //récuperer les infos sur les produits du panier
 
 //fonction affichage du panier
@@ -52,11 +52,13 @@ function cartDisplay() {
 
       //ajout de la couleur
       let itemColor = document.createElement("p");
-      itemColor.innerHTML = productsLocalStorage[i].color;
+      itemColor.innerHTML = "couleur : " + productsLocalStorage[i].color;
+      description.appendChild(itemColor);
 
       //ajout du prix
       let itemPrice = document.createElement("p");
-      itemPrice.innerHTML = productsLocalStorage[i].price + " " + "€";
+      itemPrice.innerHTML =
+        "prix : " + productsLocalStorage[i].price + " " + "€";
       description.appendChild(itemPrice);
 
       //Ajout de la div content settings
@@ -97,35 +99,274 @@ function cartDisplay() {
 
       //supprimer les produits du panier lors du clic
       deleteItems.addEventListener("click", (e) => {
-        e.preventDefault;
+        e.stopPropagation();
+        e.preventDefault();
 
-        //iD a supprimer
+        //iD  et couleur a supprimer
         let deletedId = productsLocalStorage[i]._id;
-
-        //couleur a supprimer
         let deletedColor = productsLocalStorage[i].color;
 
-        //sélectionner les elements à supprimer avec la méthode filter
-        productsLocalStorage = productsLocalStorage.filter(
-          (el) => el._id !== deletedId || el.color !== deletedColor
+        //sélectionner la position de l'element à supprimer dans localstorage
+        let index = findElementinLocalStorage(
+          productsLocalStorage,
+          deletedId,
+          deletedColor
         );
-        //console.log(productsLocalStorage);
+        // supprimer l'element du localstorage
+        productsLocalStorage.splice(index, 1);
 
         //Mise à jour du localstorage
-        //transformer en format Json et l'envoyer dans le localstorage
-        localStorage.setItem("products", JSON.stringify(productsLocalStorage));
-
+        setLocalStorage(productsLocalStorage);
+        totalDisplay(productsLocalStorage);
         //alerte de suppression du produit
         alert("Produit supprimé du panier");
+
+        console.log(deleteItems.closest(".cart__item"));
+        deleteItems.closest(".cart__item").remove();
+
         //rechargement de la page
         location.reload();
       });
+
+      //Mise à jour du localstorage lors de la modification de la quantité d'articles
+
+      function qtyUpdate() {
+        //Je selectionne l'élément "itemQuantity"
+        let qtyModif = document.getElementsByClassName("itemQuantity");
+        for (let index = 0; index < qtyModif.length; index++) {
+          qtyModif[index].addEventListener("change", (e) => {
+            e.preventDefault();
+            //element à modifier
+            let qtyelementMod = productsLocalStorage[i].quantity;
+            let qtyValue = qtyModif[index].value;
+
+            const modifResult = productsLocalStorage.find(
+              (el) => el.qtyValue !== qtyelementMod
+            );
+
+            modifResult.quantity = qtyValue;
+            productsLocalStorage[i].quantity = modifResult.quantity;
+
+            localStorage.setItem(
+              "products",
+              JSON.stringify(productsLocalStorage)
+            );
+
+            //rechargement
+            location.reload();
+          });
+        }
+      }
     }
+
+    totalDisplay(productsLocalStorage);
+    qtyUpdate();
   }
 }
 
-cartDisplay();
+function findElementinLocalStorage(table, id, color) {
+  let index = -1;
+  table.forEach((element) => {
+    if (element._id == id && element.color == color)
+      index = table.indexOf(element);
+  });
 
-//fonction de calcul du prix total des articles
+  return index;
+}
 
-//fonction de modification de quantités d'articles
+//*****************************calcul des totaux d'articles************* */
+
+//Affichage du prix total
+function totalDisplay(table) {
+  let totQty = 0;
+  let totPrice = 0.0;
+
+  for (let i = 0; i < table.length; i++) {
+    totQty += table[i].quantity;
+    totPrice += table[i].quantity * table[i].price;
+  }
+  document.getElementById("totalQuantity").textContent = totQty;
+  document.getElementById("totalPrice").textContent = totPrice;
+}
+
+/******************************FORMULAIRE************************** */
+//Vérifcation du formulaire
+//selection des inputs du formulaire
+const inputFirstName = document.getElementById("firstName");
+const inputLastName = document.getElementById("lastName");
+const inputAddress = document.getElementById("address");
+const inputCity = document.getElementById("city");
+const inputEmail = document.getElementById("email");
+//variables regExp
+let regexNamecity = /^[a-z,.'-]+$/i;
+let regexAddress = /^[0-9a-zA-Z-\s,.'ç]{3,}$/;
+let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+
+//validation du prenom selon le regExp
+inputFirstName.addEventListener("input", (e) => {
+  e.preventDefault();
+
+  if (
+    regexNamecity.test(inputFirstName.value) == false ||
+    inputFirstName == ""
+  ) {
+    document.getElementById("firstNameErrorMsg").innerHTML =
+      "Le prénom doit comprorter que des lettres et ne doit pas dépasser 30 caractère";
+    return false;
+  } else {
+    document.getElementById("firstNameErrorMsg").innerHTML = "";
+    return true;
+  }
+});
+
+//Conditions de vérification du nom
+inputLastName.addEventListener("input", (e) => {
+  e.preventDefault();
+
+  if (regexNamecity.test(inputLastName.value) == false || inputLastName == "") {
+    document.getElementById("lastNameErrorMsg").innerHTML =
+      "Le nom doit comprorter que des lettres et ne doit pas dépasser 30 caractère";
+    return false;
+  } else {
+    document.getElementById("lastNameErrorMsg").innerHTML = "";
+    return true;
+  }
+});
+
+//Conditions de vérification du l'adresse
+inputAddress.addEventListener("input", (e) => {
+  e.preventDefault();
+
+  if (regexAddress.test(inputAddress.value) == false || inputAddress == "") {
+    document.getElementById("addressErrorMsg").innerHTML =
+      "Veuillez entrer une adresse valide";
+    return false;
+  } else {
+    document.getElementById("addressErrorMsg").innerHTML = "";
+    return true;
+  }
+});
+
+//Conditions de vérification de la ville
+inputCity.addEventListener("input", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (regexNamecity.test(inputCity.value) == false || inputCity == "") {
+    document.getElementById("cityErrorMsg").innerHTML =
+      "Veuillez entrer une adresse valide";
+    return false;
+  } else {
+    document.getElementById("cityErrorMsg").innerHTML = "";
+    return true;
+  }
+});
+
+//Fonction de vérification de l'email
+email.addEventListener("input", (e) => {
+  e.preventDefault();
+  if (regexEmail.test(inputEmail.value) == false || inputEmail.value == "") {
+    document.getElementById("emailErrorMsg").innerHTML =
+      "Veuillez entrer un email valide !";
+    return false;
+  } else {
+    document.getElementById("emailErrorMsg").innerHTML = "";
+    return true;
+  }
+});
+//Selection du bouton "commander"
+const btnCommand = document.getElementById("order");
+
+//submit bouton commander
+btnCommand.addEventListener("click", (e) => {
+  e.stopPropagation();
+  e.preventDefault();
+
+   let firstName = inputFirstName.value;
+   let lastName = inputLastName.value;
+   let address = inputAddress.value;
+   let city = inputCity.value;
+   let email = inputEmail.value;
+
+  //conditions de validations des données
+  if (
+    firstName.value === "" ||
+    lastName.value === "" ||
+    address.value === "" ||
+    city.value === "" ||
+    email.value === ""
+  ) {
+    alert("Tous les champs sont requis !")
+  }
+  else if (
+    regexNamecity.test(inputFirstName.value) == false ||
+    regexNamecity.test(inputLastName.value) == false ||
+    regexAddress.test(inputAddress.value) == false ||
+    regexNamecity.test(inputCity.value) == false ||
+    regexEmail.test(inputEmail.value) == false
+  ) {
+    alert("Veuillez remplir correctement les chapms demandés !");
+    
+  }else{
+    return true;
+  }
+});
+
+//envoyer les infos dans le localstorage lors du clic
+btnCommand.addEventListener("click" ,(e) => {
+  //récupération des valeurs du formulaire
+  const inputFormValues = {
+firstName: document.getElementById("firstName").value,
+lastName: document.getElementById("lastName").value,
+address: document.getElementById("address").value,
+city: document.getElementById("city").value,
+email: document.getElementById("email").value
+  }
+  console.log(inputFormValues);
+  //envoi vers le localstorage
+  localStorage.setItem("inputFormValues", JSON.stringify(inputFormValues));
+  
+//infos à envoyer 
+//les contacts
+/*const contacts = {
+    firstName: inputFirstName.value,
+    lastName: inputLastName.value,
+    address: inputAddress.value,
+    city: inputCity.value,
+    email: inputEmail.value
+};*/
+//les produits
+let productsTab = [];
+  for(let i = 0; i < productsLocalStorage.length; i++){
+    productsTab.push(productsLocalStorage[i]._id);
+  }
+  console.log(productsTab);
+
+
+
+  //Appel à l'API pour envoyer les données
+  const options = {
+    method: "POST",
+    body: JSON.stringify(inputFormValues, productsTab),
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    }
+  };
+fetch(`http://localhost:3000/api/products/order`, options)
+
+    .then((response) => {
+      return response.json();
+      })
+    .then((res) =>{
+      document.location.href ="./confirmation.html?" + res.orderId;
+      localStorage.clear();
+    })
+    .catch((error) => {
+      console.log(error);
+      alert("Une erreur est survenue !");
+    });
+  
+
+  });
+ 

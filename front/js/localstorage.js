@@ -3,7 +3,7 @@ function setLocalStorage(productArray) {
   localStorage.setItem("products", JSON.stringify(productArray));
 }
 
-//recuperer localstorage renvoyer le tableau du json stocké
+//recuperer le localstorage et renvoyer le tableau du json stocké
 function getLocalStorage() {
   let productArray = [];
   if (localStorage.getItem("products")) {
@@ -18,12 +18,13 @@ function addProductToLocalStorage(productArray, product) {
   for (i = 0; i < productArray.length; i++) {
     if (productArray[i]._id == product._id && productArray[i].color == product.color) {
       let qteTotal = productArray[i].quantity + product.quantity;
-      let valid = controlQuantity(qteTotal, chooseColor);
-      let chooseColor =productArray[i].color + product.color;
+      let valid = controlQuantity(qteTotal);
 
       if (valid) {
         productArray[i].quantity = qteTotal;
-        productArray[i].color = chooseColor;
+//4/ mettre à jour le localstorage avec le nouveau tableau
+setLocalStorage(productArray);
+    alert("Produit ajouté au panier !");
       }
       isExist = true;
     }
@@ -31,6 +32,9 @@ function addProductToLocalStorage(productArray, product) {
   if (isExist == false) {
     // Ajouter l'element dans le tableau
     productArray.push(product);
+    //4/ mettre à jour le localstorage avec le nouveau tableau
+setLocalStorage(productArray);
+alert("Produit ajouté au panier !");
   }
 }
 
@@ -45,13 +49,12 @@ function controlQuantity(productQuantity) {
 }
 
 //vérification de la couleur choisie pour le produit à ajouter
-function controlColor(itemColor, chooseColor) {
+function controlColor(itemColor) {
   if (itemColor != "") {
     return true;
-  } else if(itemColor == ""){
+  } else{
     alert("Veuillez choisir une couleur !");
     return false;
   }
 };
-
 
