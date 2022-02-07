@@ -135,25 +135,22 @@ function cartDisplay() {
         let qtyModif = document.getElementsByClassName("itemQuantity");
         for (let index = 0; index < qtyModif.length; index++) {
           qtyModif[index].addEventListener("change", (e) => {
+            e.stopPropagation();
             e.preventDefault();
-            //element à modifier
-            let qtyelementMod = productsLocalStorage[i].quantity;
-            let qtyValue = qtyModif[index].value;
+            // controler la quantité 
+            let valid = controlQuantity(parseInt(qtyModif[index].value));
+            if (valid){
 
-            const modifResult = productsLocalStorage.find(
-              (el) => el.qtyValue !== qtyelementMod
-            );
+              
+              let newQty = parseInt(qtyModif[index].value);
+              productsLocalStorage[i].quantity = newQty;
 
-            modifResult.quantity = qtyValue;
-            productsLocalStorage[i].quantity = modifResult.quantity;
+            setLocalStorage(productsLocalStorage);
 
-            localStorage.setItem(
-              "products",
-              JSON.stringify(productsLocalStorage)
-            );
-
-            //rechargement
-            location.reload();
+           totalDisplay(productsLocalStorage);
+            }
+            
+            
           });
         }
       }
@@ -198,12 +195,12 @@ const inputAddress = document.getElementById("address");
 const inputCity = document.getElementById("city");
 const inputEmail = document.getElementById("email");
 //variables regExp
-let regexNamecity = /^[a-z,.'-]+$/i;
+let regexNamecity = /^[A-Za-z,.'-]+$/i;
 let regexAddress = /^[0-9a-zA-Z-\s,.'ç]{3,}$/;
 let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
 //validation du prenom selon le regExp
-inputFirstName.addEventListener("input", (e) => {
+inputFirstName.addEventListener("change", (e) => {
   e.preventDefault();
 
   if (
@@ -220,7 +217,7 @@ inputFirstName.addEventListener("input", (e) => {
 });
 
 //Conditions de vérification du nom
-inputLastName.addEventListener("input", (e) => {
+inputLastName.addEventListener("change", (e) => {
   e.preventDefault();
 
   if (regexNamecity.test(inputLastName.value) == false || inputLastName == "") {
@@ -234,7 +231,7 @@ inputLastName.addEventListener("input", (e) => {
 });
 
 //Conditions de vérification du l'adresse
-inputAddress.addEventListener("input", (e) => {
+inputAddress.addEventListener("change", (e) => {
   e.preventDefault();
 
   if (regexAddress.test(inputAddress.value) == false || inputAddress == "") {
@@ -248,7 +245,7 @@ inputAddress.addEventListener("input", (e) => {
 });
 
 //Conditions de vérification de la ville
-inputCity.addEventListener("input", (e) => {
+inputCity.addEventListener("change", (e) => {
   e.preventDefault();
   e.stopPropagation();
 
@@ -263,7 +260,7 @@ inputCity.addEventListener("input", (e) => {
 });
 
 //Fonction de vérification de l'email
-email.addEventListener("input", (e) => {
+email.addEventListener("change", (e) => {
   e.preventDefault();
   if (regexEmail.test(inputEmail.value) == false || inputEmail.value == "") {
     document.getElementById("emailErrorMsg").innerHTML =
@@ -308,12 +305,12 @@ btnCommand.addEventListener("click", (e) => {
     alert("Veuillez remplir correctement les chapms demandés !");
     
   }else{
-    return true;
+    sendOrder();
   }
 });
 
 //envoyer les infos dans le localstorage lors du clic
-btnCommand.addEventListener("click" ,(e) => {
+function sendOrder()  {
   //récupération des valeurs du formulaire
   const inputFormValues = {
 firstName: document.getElementById("firstName").value,
@@ -347,10 +344,10 @@ let productsTab = [];
   //Appel à l'API pour envoyer les données
   const options = {
     method: "POST",
-    body: JSON.stringify(inputFormValues, productsTab),
+    body: JSON.stringify({contact : inputFormValues, products: productsTab}),
     headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
+      'Accept': "application/json",
+      'Content-Type': "application/json",
     }
   };
 fetch(`http://localhost:3000/api/products/order`, options)
@@ -359,8 +356,9 @@ fetch(`http://localhost:3000/api/products/order`, options)
       return response.json();
       })
     .then((res) =>{
-      document.location.href ="./confirmation.html?" + res.orderId;
       localStorage.clear();
+      document.location.href =`./confirmation.html?orderId=${res.orderId}`;
+      
     })
     .catch((error) => {
       console.log(error);
@@ -368,5 +366,5 @@ fetch(`http://localhost:3000/api/products/order`, options)
     });
   
 
-  });
+  }
  
