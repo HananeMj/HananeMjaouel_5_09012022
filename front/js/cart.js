@@ -274,7 +274,7 @@ email.addEventListener("change", (e) => {
 //Selection du bouton "commander"
 const btnCommand = document.getElementById("order");
 
-//submit bouton commander
+//clic sur le bouton commander et soumission du formulaire.
 btnCommand.addEventListener("click", (e) => {
   e.stopPropagation();
   e.preventDefault();
@@ -323,15 +323,6 @@ email: document.getElementById("email").value
   //envoi vers le localstorage
   localStorage.setItem("inputFormValues", JSON.stringify(inputFormValues));
   
-//infos à envoyer 
-//les contacts
-/*const contacts = {
-    firstName: inputFirstName.value,
-    lastName: inputLastName.value,
-    address: inputAddress.value,
-    city: inputCity.value,
-    email: inputEmail.value
-};*/
 //les produits
 let productsTab = [];
   for(let i = 0; i < productsLocalStorage.length; i++){
