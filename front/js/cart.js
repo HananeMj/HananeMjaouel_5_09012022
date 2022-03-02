@@ -1,6 +1,34 @@
-let productsLocalStorage = getLocalStorage();
-cartDisplay();
-//récuperer les infos sur les produits du panier
+let productsLocalStorageInitial = getLocalStorage();
+loadAPI();
+let productsLocalStorage=[];
+//récupérer le prix des articles et prepare la liste des produitq à afficher
+function loadAPI () {
+  fetch('http://localhost:3000/api/products/')
+  .then ((response) => response.json())
+  .then((products) =>{
+    console.log("test");
+     for(let i of productsLocalStorageInitial){
+       // tester 
+       let productData = products.find(products => products._id ===  i._id);
+       if(productData){
+         const element = {
+        _id: i._id,
+        name: i.name,
+        imageUrl: i.imageUrl,
+        altTxt: i.altTxt,
+        quantity: i.quantity,
+        color: i.color,
+        price : parseFloat(productData.price)
+      };
+      productsLocalStorage.push(element);}
+     }; 
+     cartDisplay();
+     
+  })
+  .catch(error => console.log("Erreur : " + error));
+    
+  
+}
 
 //fonction affichage du panier
 function cartDisplay() {
@@ -17,7 +45,9 @@ function cartDisplay() {
   //Si le localstorage contient des produits, les afficher
   if (productsLocalStorage) {
     for (let i = 0; i < productsLocalStorage.length; i++) {
+
       let articles = document.getElementById("cart__items");
+
       //Ajout de "article"
       let article = document.createElement("article");
       article.classList.add("cart__item");

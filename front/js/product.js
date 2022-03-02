@@ -61,7 +61,6 @@ const addBasket = () => {
     let product = {
       _id: dataProduct._id,
       name: dataProduct.name,
-      price: dataProduct.price,
       imageUrl: dataProduct.imageUrl,
       altTxt: dataProduct.altTxt,
       quantity: productQuantity,
